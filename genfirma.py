@@ -31,7 +31,10 @@ for md_file in sorted(os.listdir(MARKDOWN_DIR)):
     if not md_file.endswith('.md'):
         continue
 
-    name = os.path.splitext(md_file)[0]
+    # Extrakce čísla a textu ze souboru
+    name_with_ext = os.path.splitext(md_file)[0]  # Např. '01_uvod'
+    number, name = name_with_ext.split('_', 1)  # Rozdělí na číslo a text
+
     md_path = os.path.join(MARKDOWN_DIR, md_file)
 
     with open(md_path, 'r', encoding='utf-8') as f:
@@ -40,7 +43,7 @@ for md_file in sorted(os.listdir(MARKDOWN_DIR)):
     html = markdown.markdown(text, extensions=['fenced_code', 'tables'])
     last_modified = get_git_last_modified_date(md_path)
 
-    html_file = f"{name}.html"
+    html_file = f"{name_with_ext}.html"
     html_path = os.path.join('html', html_file)
 
     # Uložení HTML souboru pro každý .md soubor
@@ -55,7 +58,8 @@ for md_file in sorted(os.listdir(MARKDOWN_DIR)):
 </html>''')
 
     files_html.append({
-        'name': name,
+        'number': int(number),  # Uložení čísla pro správné řazení
+        'name': name.upper(),  # Text na tlačítku (velkými písmeny)
         'file': html_file,
         'last_modified': last_modified
     })
@@ -111,9 +115,9 @@ with open(INDEX_FILE, 'w', encoding='utf-8') as f:
   <div id="buttons-container">
 ''')
 
-    # Vygenerování tlačítek pro každý soubor
-    for file in files_html:
-        f.write(f'''      <button onclick="window.location.href='html/{file['file']}'">{file['name'].capitalize()}</button>\n''')
+    # Seřazení souborů podle čísla a generování tlačítek
+    for file in sorted(files_html, key=lambda x: x['number']):
+        f.write(f'''      <button onclick="window.location.href='html/{file['file']}'">{file['name']}</button>\n''')
 
     f.write('''
   </div>
