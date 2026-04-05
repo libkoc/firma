@@ -18,7 +18,11 @@ Specializujeme se na **automatizaci**, **digitalizaci** a **inovace**, které p�
 ## Kontaktujte nás 📞
 
 **Ing. Libor Kocián**
+
 🏠 **Adresa:** 696 13 Šardice 390
+
 🆔 **IČO:** 24899399
+
 📱 **Mobil:** 602 941 181
+
 📧 **Email:** [kocian.libor@seznam.cz](mailto:kocian.libor@seznam.cz)
