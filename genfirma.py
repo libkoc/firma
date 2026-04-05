@@ -4,8 +4,8 @@ import subprocess
 from datetime import datetime
 
 # === KONSTANTY ===
-MARKDOWN_DIR = 'mdfirma'  # Složka, kde jsou .md soubory
-INDEX_FILE = 'index.html'  # Výstupní HTML soubor
+MARKDOWN_DIR = 'mdfirma'
+INDEX_FILE = 'index.html'
 
 # === VYTVOR SLOŽKY PRO HTML ===
 os.makedirs('html', exist_ok=True)
@@ -18,22 +18,21 @@ def get_git_last_modified_date(file_path):
     except subprocess.CalledProcessError:
         return 'Neznámé'
 
-# === GIT PULL PŘED SPUŠTĚNÍM ===
+# === GIT PULL ===
 try:
     subprocess.run(['git', 'pull', 'origin', 'main'], check=True)
     print("✅ Aktualizace z GitHubu proběhla.")
 except subprocess.CalledProcessError:
     print("⚠ Nepodařilo se provést git pull.")
 
-# === ZPRACUJ VŠECHNY .md SOUBORY ===
+# === ZPRACUJ .md SOUBORY ===
 files_html = []
 for md_file in sorted(os.listdir(MARKDOWN_DIR)):
     if not md_file.endswith('.md'):
         continue
 
-    # Extrakce čísla a textu ze souboru
-    name_with_ext = os.path.splitext(md_file)[0]  # Např. '01_uvod'
-    number, name = name_with_ext.split('_', 1)  # Rozdělí na číslo a text
+    name_with_ext = os.path.splitext(md_file)[0]
+    number, name = name_with_ext.split('_', 1)
 
     md_path = os.path.join(MARKDOWN_DIR, md_file)
 
@@ -46,96 +45,231 @@ for md_file in sorted(os.listdir(MARKDOWN_DIR)):
     html_file = f"{name_with_ext}.html"
     html_path = os.path.join('html', html_file)
 
-    # Uložení HTML souboru pro každý .md soubor
+    # === GENERUJ PODSTRÁNKU ===
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(f'''<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>{name}</title></head>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{name}</title>
+
+<style>
+  :root {{
+    --bg: #ffffff;
+    --text: #111;
+    --primary: #007BFF;
+  }}
+
+  body.dark {{
+    --bg: #121212;
+    --text: #eee;
+    --primary: #4da3ff;
+  }}
+
+  body {{
+    font-family: sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 800px;
+    margin: auto;
+    padding: 1em;
+    font-size: 18px;
+    line-height: 1.6;
+  }}
+
+  a {{
+    color: var(--primary);
+  }}
+
+  #top {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }}
+
+  button {{
+    padding: 0.5em 1em;
+    border: none;
+    background: var(--primary);
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+  }}
+
+</style>
+</head>
+
 <body>
+
+<div id="top">
+  <a href="../{INDEX_FILE}">← Zpět</a>
+  <button onclick="toggleDark()">🌙</button>
+</div>
+
+<hr>
+
 {html}
-<p><a href="../{INDEX_FILE}">← Zpět na přehled</a></p>
+
+<script>
+function toggleDark() {{
+  document.body.classList.toggle('dark');
+  localStorage.setItem('dark-mode', document.body.classList.contains('dark'));
+}}
+
+if (localStorage.getItem('dark-mode') === 'true') {{
+  document.body.classList.add('dark');
+}}
+</script>
+
 </body>
 </html>''')
 
     files_html.append({
-        'number': int(number),  # Uložení čísla pro správné řazení
-        'name': name.upper(),  # Text na tlačítku (velkými písmeny)
+        'number': int(number),
+        'name': name.upper(),
         'file': html_file,
         'last_modified': last_modified
     })
 
-# === GENERUJ index.html ===
+# === GENERUJ INDEX ===
 with open(INDEX_FILE, 'w', encoding='utf-8') as f:
     f.write(f'''<!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <title>Firemní stránka</title>
-  <style>
-    body {{ font-family: sans-serif; max-width: 1000px; margin: auto; padding: 2em; }}
-    button {{ 
-        padding: 0.6em 1.2em; 
-        background-color: #007BFF;  /* Modrá barva */
-        color: white; 
-        border: none; 
-        border-radius: 5px; 
-        cursor: pointer;
-        margin: 10px;
-        font-size: 16px;
-        text-align: center;
-        transition: background-color 0.3s ease;
-    }}
-    button:hover {{
-        background-color: #0056b3;  /* Tmavší modrá při hover */
-    }}
-    #search {{
-        width: 100%;
-        padding: 0.5em;
-        margin-bottom: 20px;
-    }}
-    table {{
-        width: 100%;
-        border-collapse: collapse;
-    }}
-    th, td {{
-        padding: 0.8em;
-        text-align: left;
-        border: 1px solid #ddd;
-    }}
-    th {{
-        background-color: #f2f2f2;
-    }}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firemní stránka</title>
+
+<style>
+:root {{
+  --bg: #ffffff;
+  --text: #111;
+  --card: #f5f5f5;
+  --primary: #007BFF;
+}}
+
+body.dark {{
+  --bg: #121212;
+  --text: #eee;
+  --card: #1e1e1e;
+  --primary: #4da3ff;
+}}
+
+body {{
+  font-family: sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: auto;
+  padding: 1em;
+  max-width: 1000px;
+}}
+
+#top-bar {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}}
+
+h1 {{
+  font-size: 1.6em;
+}}
+
+h2 {{
+  font-size: 1.2em;
+  margin-bottom: 1em;
+}}
+
+#search {{
+  width: 100%;
+  padding: 0.7em;
+  font-size: 16px;
+  margin: 1em 0;
+}}
+
+#toggle-dark {{
+  cursor: pointer;
+  padding: 0.5em 1em;
+  border: none;
+  background: var(--primary);
+  color: white;
+  border-radius: 6px;
+}}
+
+#cards-container {{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}}
+
+.card {{
+  background: var(--card);
+  padding: 1em;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: bold;
+  text-align: center;
+}}
+
+.card:hover {{
+  transform: translateY(-3px);
+  background: var(--primary);
+  color: white;
+}}
+
+</style>
 </head>
+
 <body>
-  <h1>🤖 Ing. Libor Kocián - Chytrá řešení pro automatizaci, digitalizaci, inovace⚙️</h1>
-  <h2>💡 Poznejte možnosti automatizace a inovací ve vašich procesech
-– první analýza a návrh chytrých řešení ZDARMA!</h2>
 
-  <input type="text" id="search" placeholder="🔍 Hledat...">
+<div id="top-bar">
+  <h1>🤖 Ing. Libor Kocián</h1>
+  <button id="toggle-dark">🌙</button>
+</div>
 
-  <div id="buttons-container">
+<h2>💡 Automatizace • Digitalizace • Inovace</h2>
+
+<input type="text" id="search" placeholder="🔍 Hledat...">
+
+<div id="cards-container">
 ''')
 
-    # Seřazení souborů podle čísla a generování tlačítek
     for file in sorted(files_html, key=lambda x: x['number']):
-        f.write(f'''      <button onclick="window.location.href='html/{file['file']}'">{file['name']}</button>\n''')
+        f.write(f'''
+<div class="card" onclick="window.location.href='html/{file['file']}'">
+  {file['name']}
+</div>
+''')
 
     f.write('''
-  </div>
+</div>
 
-  <script>
-    const searchInput = document.getElementById('search');
-    const buttons = document.querySelectorAll('button');
+<script>
+const searchInput = document.getElementById('search');
+const cards = document.querySelectorAll('.card');
 
-    searchInput.addEventListener('input', function () {
-      const query = this.value.toLowerCase();
-      buttons.forEach(button => {
-        const text = button.innerText.toLowerCase();
-        button.style.display = text.includes(query) ? '' : 'none';
-      });
-    });
-  </script>
+searchInput.addEventListener('input', function () {
+  const query = this.value.toLowerCase();
+  cards.forEach(card => {
+    const text = card.innerText.toLowerCase();
+    card.style.display = text.includes(query) ? '' : 'none';
+  });
+});
+
+// dark mode
+const toggleBtn = document.getElementById('toggle-dark');
+
+toggleBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  localStorage.setItem('dark-mode', document.body.classList.contains('dark'));
+});
+
+if (localStorage.getItem('dark-mode') === 'true') {
+  document.body.classList.add('dark');
+}
+</script>
+
 </body>
 </html>
 ''')
@@ -143,8 +277,8 @@ with open(INDEX_FILE, 'w', encoding='utf-8') as f:
 # === GIT COMMIT A PUSH ===
 try:
     subprocess.run(['git', 'add', '.'], check=True)
-    subprocess.run(['git', 'commit', '-m', 'Automatická aktualizace firemní stránky'], check=True)
+    subprocess.run(['git', 'commit', '-m', 'Automatická aktualizace webu'], check=True)
     subprocess.run(['git', 'push'], check=True)
     print("✅ Změny odeslány na GitHub.")
 except subprocess.CalledProcessError:
-    print("⚠ Git commit/push selhal – možná nejsou žádné změny.")
+    print("⚠ Git commit/push selhal – možná nejsou změny.")
