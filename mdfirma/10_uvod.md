@@ -19,7 +19,7 @@ Specializujeme se na **automatizaci**, **digitalizaci** a **inovace**, které p�
 
 **Ing. Libor Kocián**
 
-🏠 **Adresa:** 696 13 Šardice 390
+🏠 **Adresa:** 696 13, Šardice 390
 
 🆔 **IČO:** 24899399
 
